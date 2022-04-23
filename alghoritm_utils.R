@@ -1,3 +1,5 @@
+source("params.R")
+
 stop_stabilization <- function(prev_pred, pred){
   pred_labels = round(pred)
   prev_pred_labels = round(prev_pred)
@@ -6,7 +8,6 @@ stop_stabilization <- function(prev_pred, pred){
 }
 
 stop_certainty_growth <- function(pred){
-
   mean_certainty = abs(1 - mean(abs(pred - round(pred))))
   if(mean_certainty < criterion_args$highest_certainty_sofar){
     return(TRUE)
@@ -21,24 +22,17 @@ stop_certainty_level <- function(pred){
   return(mean_certainty > criterion_args$mean_certainty_threshold)
 }
 
-stop_criterion <- function(prev_pred, pred){
-  if(criterion_types[c_type] == "stabilization"){
+stop_criterion <- function(criterion, prev_pred, pred){
+  if(criterion == criterion_types$stabilization)
     return(stop_stabilization(prev_pred, pred))
-  }
 
-  if(criterion_types[c_type] == "certainty_growth"){
+  if(criterion == criterion_types$certainty_growth)
     return(stop_certainty_growth(pred))
-  }
   
-  if(criterion_types[c_type] == "certainty_threshold"){
+  if(criterion == criterion_types$certainty_threshold)
     return(stop_certainty_level(pred))
-  }
-  # switch(
-  #   condition,
-  #   stabilization={return(stop_stabilization(prev_pred, pred)) },
-  #   certainty_growth={return(stop_certainty_growth(pred))},
-  #   certainty_level={return(stop_certainty_level(pred))},
-  # )
+  
+  stop("Invalid criterion: ", criterion)
 }
 
 choose_most_certain <- function(sample_rows, pred){
