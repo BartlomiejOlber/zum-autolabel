@@ -22,14 +22,14 @@ stop_certainty_level <- function(pred){
   return(mean_certainty > criterion_args$mean_certainty_threshold)
 }
 
-stop_criterion <- function(criterion, prev_pred, pred){
-  if(criterion == criterion_types$stabilization)
+check_stop_criterion <- function(criterion, prev_pred, pred){
+  if(criterion == CRITERION_TYPES$stabilization)
     return(stop_stabilization(prev_pred, pred))
 
-  if(criterion == criterion_types$certainty_growth)
+  if(criterion == CRITERION_TYPES$certainty_growth)
     return(stop_certainty_growth(pred))
   
-  if(criterion == criterion_types$certainty_threshold)
+  if(criterion == CRITERION_TYPES$certainty_threshold)
     return(stop_certainty_level(pred))
   
   stop("Invalid criterion: ", criterion)
@@ -38,7 +38,7 @@ stop_criterion <- function(criterion, prev_pred, pred){
 choose_most_certain <- function(sample_rows, pred){
   percentile = quantile(abs(pred - round(pred)), autolabel_percent)
   most_certain = sample_rows[abs(pred - round(pred)) < percentile,]
-  most_certain[, n_cols] = round(pred[abs(pred - round(pred)) < percentile])
+  most_certain[, length(most_certain)] = round(pred[abs(pred - round(pred)) < percentile])
   return(most_certain)
 }
 

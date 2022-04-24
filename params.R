@@ -2,11 +2,11 @@ use_xgb <- TRUE
 eval_on_test <- TRUE
 
 
-criterion_types <- list(
+CRITERION_TYPES <- list(
   "stabilization"="stabilization", 
   "certainty_growth"="certainty_growth", 
   "certainty_threshold"="certainty_threshold")
-used_criterion = criterion_types$stabilization
+criterion_used = CRITERION_TYPES$certainty_threshold
 criterion_args <- list(
   "similarity_threshold" = 0.97, # stabilization
   "highest_certainty_sofar" = 0.0, # certainty_growth
@@ -20,15 +20,15 @@ sample_size = 200
 autolabel_percent = 0.05
 patience <- 5
 
-# XGBOOST
+###### XGBOOST
 xgb_max_depth <- 20
 xgb_eta <- 0.8
-xgb_nthread <- 2
 xgb_nrounds <- 20
+xgb_nthread <- 2
 xgb_objective <- "binary:logistic"
 xgb_verbose <- 0
 
-# SVM
+###### SVM
 svm_kernel <- "radial"
 svm_cost <-1
 svm_scale <- FALSE

@@ -18,24 +18,22 @@ set.seed(seed)
 # raw_data <- read.table("ring.dat", header=FALSE, skip=25, sep = ',')
 # raw_data <- read.table("magic.dat", header=FALSE, skip=16, sep=',')
 raw_data <- read.table("spambase.dat", header = FALSE, skip = 63, sep = ',')
-n_rows = nrow(raw_data)
-n_cols = ncol(raw_data)
-
 data <- prepare_data(raw_data)
 test_set        = data$test_set
 labelled_set    = data$labelled_set
 unlabelled_set  = data$unlabelled_set
 decision_set    = data$decision_set
 
+N_COLS = data$n_cols
+LABELLED_INITIAL_SIZE = data$train_labelled_initial_size
 
 # Autolabel algorithm
 # 1. train
 # 2. count eval metrics on test set and append them to list
 # 3. prediction on decision set
-# 4. stop if stabilized or certain on decision set; 
-#         K patience iterations, 
-#         P min percent predicted the same way as before, 
-#         A mean certainty (abs(probability-label)) to be achieived or boolean if it stopped to grow
+# 4. stop if stabilized or certain on decision set;
+#         K patience iterations,
+#         P min percent predicted the same way as before, a mean certainty (abs(probability-label)) to be achieved or boolean if it stopped to grow
 # 5. prediction on M unlabelled samples
 # 6. choose N the most certain
 # 7. label them
@@ -53,8 +51,8 @@ while (loop_counter < max_iterations) {
   
   if (use_xgb) {
     dtrain <-
-      xgb.DMatrix(data = as.matrix(labelled_set[, 1:(n_cols - 1)]),
-                  label = as.numeric(labelled_set[, n_cols]))
+      xgb.DMatrix(data = as.matrix(labelled_set[, 1:(N_COLS - 1)]),
+                  label = as.numeric(labelled_set[, N_COLS]))
     classifier <- xgboost(
       data = dtrain,
       max.depth = xgb_max_depth,
@@ -67,8 +65,8 @@ while (loop_counter < max_iterations) {
   }
   else{
     classifier <- svm(
-      x = as.matrix(labelled_set[, 1:(n_cols - 1)]),
-      y = as.numeric(labelled_set[, n_cols]),
+      x = as.matrix(labelled_set[, 1:(N_COLS - 1)]),
+      y = as.numeric(labelled_set[, N_COLS]),
       kernel = svm_kernel,
       cost = svm_cost,
       scale = svm_scale,
@@ -76,27 +74,20 @@ while (loop_counter < max_iterations) {
     )
   }
   
-  if(eval_on_test){
-    test_predictions <- predict(classifier, as.matrix(test_set[1:(n_cols - 1)]))
-    auroc <- auc_roc(preds = test_predictions, actuals = test_set[, n_cols])
-    fmeasure <- compute_fmeasure(test_predictions, test_set[, n_cols])
+  if (eval_on_test) {
+    test_predictions  <- predict(classifier, as.matrix(test_set[1:(N_COLS - 1)]))
+    auroc             <- auc_roc(preds = test_predictions, actuals = test_set[, N_COLS])
+    fmeasure          <- compute_fmeasure(test_predictions, test_set[, N_COLS])
     
-    cat(sprintf("auroc: %f \n", auroc))
-    cat(sprintf("fmeasure: %f \n", fmeasure))
-    
-    auroc_results <- c(auroc_results, auroc)
-    fmeasure_results <- c(fmeasure_results, fmeasure)
+    auroc_results     <- c(auroc_results, auroc)
+    fmeasure_results  <- c(fmeasure_results, fmeasure)
   }
   
   
-  decision_set_predictions <- predict(classifier, as.matrix(decision_set[1:(n_cols - 1)]))
-  # auroc <- auc_roc(preds = decision_set_predictions, actuals = decision_set[,n_cols])
-  # fmeasure <- compute_fmeasure(decision_set_predictions, decision_set[,n_cols])
-  # cat(sprintf("auroc: %f \n", auroc))
-  # cat(sprintf("fmeasure: %f \n", fmeasure))
-  
-  if (!is.null(prev_pred) || used_criterion == criterion_types$certainty_threshold) {
-    if (stop_criterion(used_criterion, prev_pred, decision_set_predictions)) 
+  decision_set_predictions <- predict(classifier, as.matrix(decision_set[1:(N_COLS - 1)]))
+  if (!is.null(prev_pred) || criterion_used == CRITERION_TYPES$certainty_threshold) {
+    
+    if (check_stop_criterion(criterion_used, prev_pred, decision_set_predictions))
       curr_patience <- curr_patience - 1
     else
       curr_patience <- patience
@@ -106,25 +97,18 @@ while (loop_counter < max_iterations) {
   }
   prev_pred <- decision_set_predictions
   
-  sample_ids <- sample(nrow(unlabelled_set), sample_size)
-  sample_rows <- unlabelled_set[sample_ids, ]
-  sample_predictions <-
-    predict(classifier, as.matrix(sample_rows[1:(n_cols - 1)]))
+  sample_ids          <- sample(nrow(unlabelled_set), sample_size)
+  sample_rows         <- unlabelled_set[sample_ids,]
+  sample_predictions  <- predict(classifier, as.matrix(sample_rows[1:(N_COLS - 1)]))
   
-  # auroc <- auc_roc(preds = sample_predictions, actuals = sample_rows[,n_cols])
-  # fmeasure <- compute_fmeasure(sample_predictions, sample_rows[,n_cols])
-  # cat(sprintf("auroc: %f \n", auroc))
-  # cat(sprintf("fmeasure: %f \n", fmeasure))
-  
-  
-  most_certain <- choose_most_certain(sample_rows, sample_predictions)
-  unlabelled_set <- unlabelled_set[!(row.names(unlabelled_set) %in% row.names(most_certain)), ]
-  labelled_set <- rbind(labelled_set, most_certain)
+  most_certain        <- choose_most_certain(sample_rows, sample_predictions)
+  unlabelled_set      <- unlabelled_set[!(row.names(unlabelled_set) %in% row.names(most_certain)),]
+  labelled_set        <- rbind(labelled_set, most_certain)
   cat(sprintf("labelled set size: %d \n", nrow(labelled_set)))
   
   # curiosity check
-  n_incorrectly_labelled = n_incorrectly_labelled + sum(sample_rows[row.names(sample_rows) %in% row.names(most_certain), n_cols] != most_certain[, n_cols])
-  n_labelled = nrow(labelled_set) - train_labelled_n
+  n_incorrectly_labelled  = n_incorrectly_labelled + sum(sample_rows[row.names(sample_rows) %in% row.names(most_certain), N_COLS] != most_certain[, N_COLS])
+  n_labelled              = nrow(labelled_set) - LABELLED_INITIAL_SIZE
   cat(sprintf("number of incorrectly labelled: %d out of %d labelled \n", n_incorrectly_labelled, n_labelled))
   
 }
