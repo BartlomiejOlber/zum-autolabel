@@ -1,5 +1,6 @@
 use_xgb <- TRUE
 eval_on_test <- TRUE
+dataset <- "spambase" # "magic, "ring"
 
 
 CRITERION_TYPES <- list(

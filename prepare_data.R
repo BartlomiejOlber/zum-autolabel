@@ -1,8 +1,17 @@
 source("params.R")
 
-prepare_data <- function(data) {
-  n_rows = nrow(raw_data)
-  n_cols = ncol(raw_data)
+get_data <- function() {
+  if (dataset == "spambase")
+    data <- read.table("spambase.dat", header = FALSE, skip = 63, sep = ',')
+  else if (dataset == "ring")
+    data <- read.table("ring.dat", header=FALSE, skip=25, sep = ',')
+  else if (dataset =="magic")
+    data <- read.table("magic.dat", header=FALSE, skip=16, sep=',')
+  else
+    stop()
+    
+  n_rows = nrow(data)
+  n_cols = ncol(data)
   
   # z-score normalization
   data[1:(n_cols - 1)] <- scale(data[1:(n_cols - 1)])

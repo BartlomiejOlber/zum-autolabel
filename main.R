@@ -12,17 +12,19 @@ library(mltools)
 source("params.R")
 source("alghoritm_utils.R")
 source("prepare_data.R")
+source("experiments_utils.R")
 set.seed(seed)
 
-
-# raw_data <- read.table("ring.dat", header=FALSE, skip=25, sep = ',')
-# raw_data <- read.table("magic.dat", header=FALSE, skip=16, sep=',')
-raw_data <- read.table("spambase.dat", header = FALSE, skip = 63, sep = ',')
-data <- prepare_data(raw_data)
+data <- get_data(raw_data)
 test_set        = data$test_set
 labelled_set    = data$labelled_set
 unlabelled_set  = data$unlabelled_set
 decision_set    = data$decision_set
+
+cat(sprintf("test set size: %d \n", nrow(test_set)))
+cat(sprintf("labelled set size: %d \n", nrow(labelled_set)))
+cat(sprintf("unlabelled set size: %d \n", nrow(unlabelled_set)))
+cat(sprintf("decision set size: %d \n", nrow(decision_set)))
 
 N_COLS = data$n_cols
 LABELLED_INITIAL_SIZE = data$train_labelled_initial_size
@@ -40,7 +42,7 @@ LABELLED_INITIAL_SIZE = data$train_labelled_initial_size
 # 8. extend labelled, shrink unlabelled (only chosen or all considered)
 fmeasure_results = c()
 auroc_results = c()
-prev_pred <- NULL
+prev_decision_set_predictions <- NULL
 n_incorrectly_labelled <- 0
 curr_patience <- patience
 loop_counter <- 0
@@ -85,9 +87,9 @@ while (loop_counter < max_iterations) {
   
   
   decision_set_predictions <- predict(classifier, as.matrix(decision_set[1:(N_COLS - 1)]))
-  if (!is.null(prev_pred) || criterion_used == CRITERION_TYPES$certainty_threshold) {
+  if (!is.null(prev_decision_set_predictions) || criterion_used == CRITERION_TYPES$certainty_threshold) {
     
-    if (check_stop_criterion(criterion_used, prev_pred, decision_set_predictions))
+    if (check_stop_criterion(criterion_used, prev_decision_set_predictions, decision_set_predictions))
       curr_patience <- curr_patience - 1
     else
       curr_patience <- patience
@@ -95,7 +97,7 @@ while (loop_counter < max_iterations) {
     if (curr_patience == 0)
       break
   }
-  prev_pred <- decision_set_predictions
+  prev_decision_set_predictions <- decision_set_predictions
   
   sample_ids          <- sample(nrow(unlabelled_set), sample_size)
   sample_rows         <- unlabelled_set[sample_ids,]
@@ -110,8 +112,19 @@ while (loop_counter < max_iterations) {
   n_incorrectly_labelled  = n_incorrectly_labelled + sum(sample_rows[row.names(sample_rows) %in% row.names(most_certain), N_COLS] != most_certain[, N_COLS])
   n_labelled              = nrow(labelled_set) - LABELLED_INITIAL_SIZE
   cat(sprintf("number of incorrectly labelled: %d out of %d labelled \n", n_incorrectly_labelled, n_labelled))
-  
 }
 # do something with the results
 print(auroc_results)
 print(fmeasure_results)
+
+# save experiment result
+used_cl <- if (use_xgb) "xgb" else "svm"
+experiment_summary <- c(
+  used_cl,
+  dataset,
+  auroc_results[length(auroc_results)],
+  fmeasure_results[length(fmeasure_results)],
+  n_labelled,
+  n_incorrectly_labelled
+)
+update_experiments(experiment_summary)
