@@ -14,9 +14,9 @@ criterion_args <- list(
   "mean_certainty_threshold" = 0.95 # certainty_threshold
   ) 
 seed = 1
-max_iterations <- 40
-split_ratios = c(0.75, 0.25)
-split_train_ratios = c(0.01, 0.98, 0.01)
+max_iterations <- 100
+split_ratios = c(0.75, 0.25) # (train, test)
+split_train_ratios = c(0.05, 0.94, 0.01) # (labelled, unlabelled, decision)
 sample_size = 200
 autolabel_percent = 0.05
 patience <- 5

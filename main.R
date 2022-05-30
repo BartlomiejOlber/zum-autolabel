@@ -15,7 +15,7 @@ source("prepare_data.R")
 source("experiments_utils.R")
 set.seed(seed)
 
-data <- get_data(raw_data)
+data <- get_data()
 test_set        = data$test_set
 labelled_set    = data$labelled_set
 unlabelled_set  = data$unlabelled_set
@@ -124,7 +124,9 @@ experiment_summary <- c(
   dataset,
   auroc_results[length(auroc_results)],
   fmeasure_results[length(fmeasure_results)],
+  LABELLED_INITIAL_SIZE,
   n_labelled,
-  n_incorrectly_labelled
+  n_incorrectly_labelled,
+  loop_counter
 )
 update_experiments(experiment_summary)

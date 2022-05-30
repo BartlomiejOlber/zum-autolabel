@@ -1,8 +1,7 @@
 
-
 update_experiments <- function(new_row_vec){
-  experiments_csv_name <- 'experiments.csv'
-  column_names <- c('classifier', 'dataset', 'final AUROC', 'final F1', 'labelled', 'incorrectly laballed')
+  experiments_csv_name <- 'experiments_results/CURRENT.csv'
+  column_names <- c('classifier', 'dataset', 'final AUROC', 'final F1', 'initially labelled', 'labelled', 'incorrectly laballed', 'iterations')
   
   if (file.exists(experiments_csv_name)){
     df <- read.csv(experiments_csv_name, header = FALSE, sep = ",", skip = 1)
@@ -17,5 +16,3 @@ update_experiments <- function(new_row_vec){
 
   write.csv(df, experiments_csv_name, row.names = FALSE)
 }
-
-
