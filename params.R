@@ -1,4 +1,4 @@
-use_xgb <- TRUE
+use_xgb <- FALSE
 eval_on_test <- TRUE
 dataset <- "spambase" # "magic, "ring"
 

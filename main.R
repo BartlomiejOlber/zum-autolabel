@@ -124,6 +124,7 @@ experiment_summary <- c(
   dataset,
   auroc_results[length(auroc_results)],
   fmeasure_results[length(fmeasure_results)],
+  split_train_ratios[1],
   LABELLED_INITIAL_SIZE,
   n_labelled,
   n_incorrectly_labelled,
