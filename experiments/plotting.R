@@ -53,5 +53,4 @@ plot_labelled_set_size_results <- function(){
 }
 
 
-
 plot_labelled_set_size_results()

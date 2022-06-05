@@ -12,7 +12,7 @@ library(mltools)
 source("params.R")
 source("alghoritm_utils.R")
 source("prepare_data.R")
-source("experiments_utils.R")
+source("save_results.R")
 set.seed(seed)
 
 data <- get_data()
@@ -130,4 +130,4 @@ experiment_summary <- c(
   n_incorrectly_labelled,
   loop_counter
 )
-update_experiments(experiment_summary)
+save_results(experiment_summary)

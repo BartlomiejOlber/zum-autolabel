@@ -1,3 +1,0 @@
-"classifier","dataset","final AUROC","final F1"
-"svm","spambase.dat","0.92203580344406","0.81140350877193"
-"xgb","spambase.dat","0.984787242092519","0.930693069306931"

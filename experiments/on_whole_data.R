@@ -19,11 +19,12 @@ source("alghoritm_utils.R")
 ################################################################################
 dataset <- "spambase.dat"
 data <- read.table(dataset, header = FALSE, skip = 63, sep = ',')
+n_rows = nrow(data)
+n_cols = ncol(data)
 train_size                      = as.integer(n_rows * split_ratios[1])
 test_size                       = as.integer(n_rows * split_ratios[2])
 
-n_rows = nrow(data)
-n_cols = ncol(data)
+
 
 shuffled_data <-  data[sample(1:n_rows), ]
 test_set  <-       shuffled_data[row.names(data) %in%
@@ -65,7 +66,7 @@ fmeasure          <- compute_fmeasure(test_predictions, test_set[, n_cols])
 ################################################################################
 # save results
 ################################################################################
-csv <- 'experiments_results/whole_data_to_compare.csv'
+csv <- 'experiments/experiments_results/whole_data_to_compare.csv'
 column_names <- c('classifier', 'dataset', 'final AUROC', 'final F1')
 used_cl <- if (use_xgb) "xgb" else "svm"
 result <- c(
