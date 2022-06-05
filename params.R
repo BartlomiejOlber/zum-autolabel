@@ -1,4 +1,4 @@
-use_xgb <- FALSE
+use_xgb <- TRUE
 eval_on_test <- TRUE
 dataset <- "spambase" # "magic, "ring"
 
@@ -17,7 +17,7 @@ seed = 1
 max_iterations <- 100
 split_ratios = c(0.75, 0.25) # (train, test)
 split_train_ratios = c(0.01, 0.98, 0.01) # (labelled, unlabelled, decision)
-sample_size = 200
+sample_size = 1000
 autolabel_percent = 0.05
 patience <- 5
 

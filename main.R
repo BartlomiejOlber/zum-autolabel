@@ -128,6 +128,8 @@ experiment_summary <- c(
   LABELLED_INITIAL_SIZE,
   n_labelled,
   n_incorrectly_labelled,
-  loop_counter
+  loop_counter,
+  sample_size,
+  autolabel_percent
 )
 save_results(experiment_summary)

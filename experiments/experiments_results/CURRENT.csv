@@ -1,2 +1,0 @@
-"classifier","dataset","final AUROC","final F1","percentage of train size labelled","initially labelled","labelled","incorrectly laballed","iterations"
-"svm","spambase","0.941057859990035","0.810810810810811","0.05","172","996","33","100"
