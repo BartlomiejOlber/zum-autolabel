@@ -40,6 +40,7 @@ LABELLED_INITIAL_SIZE = data$train_labelled_initial_size
 # 6. choose N the most certain
 # 7. label them
 # 8. extend labelled, shrink unlabelled (only chosen or all considered)
+certainties = c()
 fmeasure_results = c()
 auroc_results = c()
 prev_decision_set_predictions <- NULL
@@ -87,6 +88,9 @@ while (loop_counter < max_iterations) {
   
   
   decision_set_predictions <- predict(classifier, as.matrix(decision_set[1:(N_COLS - 1)]))
+  # for checking how mean_certainty change over the training
+  mean_certainty = abs(1 - mean(abs(decision_set_predictions - round(decision_set_predictions))))
+  certainties = c(certainties, mean_certainty)
   if (!is.null(prev_decision_set_predictions) || criterion_used == CRITERION_TYPES$certainty_threshold) {
     
     if (check_stop_criterion(criterion_used, prev_decision_set_predictions, decision_set_predictions))
@@ -130,6 +134,10 @@ experiment_summary <- c(
   n_incorrectly_labelled,
   loop_counter,
   sample_size,
-  autolabel_percent
+  autolabel_percent,
+  criterion_used,
+  criterion_args$mean_certainty_threshold,
+  criterion_args$similarity_threshold
 )
 save_results(experiment_summary)
+save_certainties(certainties)
