@@ -60,7 +60,14 @@ plot_sample_size_results <- function(){
   common_plot(data, 'sample_size', 'sample size')
 }
 
+plot_autolabel_perc_results <- function(){
+  data <- read.csv('experiments/experiments_results/autolabel_percent_certainty_threshold.csv', header = TRUE, sep = ",")
+  
+  common_plot(data, 'autolabel_percent', 'autolabel percent')
+}
+
 
 
 #plot_labelled_set_size_results()
-plot_sample_size_results()
+#plot_sample_size_results()
+plot_autolabel_perc_results()

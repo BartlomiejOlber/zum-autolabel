@@ -17,7 +17,7 @@ seed = 1
 max_iterations <- 100
 split_ratios = c(0.75, 0.25) # (train, test)
 split_train_ratios = c(0.01, 0.98, 0.01) # (labelled, unlabelled, decision)
-sample_size = 1000
+sample_size = 200
 autolabel_percent = 0.05
 patience <- 5
 
