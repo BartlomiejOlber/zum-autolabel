@@ -1,2 +1,2 @@
 "classifier","dataset","final AUROC","final F1","percentage of train size labelled","initially labelled","labelled","incorrectly laballed","iterations","sample_size","autolabel_percent","criterion_used","mean_certainty_threshold","similarity_threshold"
-"xgb","spambase","0.875960700049826","0.757510729613734","0.01","34","737","30","100","400","0.1","certainty_threshold","0.95","0.97"
+"svm","spambase","0.843589623816642","0.549483013293944","0.01","34","2985","541","76","400","0.1","certainty_threshold","0.95","0.97"

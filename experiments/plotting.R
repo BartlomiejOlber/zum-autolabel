@@ -67,14 +67,14 @@ plot_autolabel_perc_results <- function(){
 }
 
 plot_certainties <- function(){
-  data <- read.csv('experiments/experiments_results/CERTAINTIES.csv', header = TRUE, sep = ",")
+  data <- read.csv('experiments/experiments_results/svm_certainties.csv', header = TRUE, sep = ",")
   certainties <- data[['mean_certainty']]
-  plot(certainties, main = glue('Mean certainty over algorithm'), type = 'l', col = 'blue', ylim = c(0.8, 0.95), xlab = 'iteration', ylab = 'mean certainty')
+  plot(certainties, main = glue('SVM: mean certainty over algorithm'), type = 'l', col = 'blue', ylim = c(0.5, 1), xlab = 'iteration', ylab = 'mean certainty')
 }
 
 
 
 #plot_labelled_set_size_results()
-plot_sample_size_results()
+#plot_sample_size_results()
 #plot_autolabel_perc_results()
-#plot_certainties()
+plot_certainties()
