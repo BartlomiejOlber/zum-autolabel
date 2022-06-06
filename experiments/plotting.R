@@ -66,6 +66,18 @@ plot_autolabel_perc_results <- function(){
   common_plot(data, 'autolabel_percent', 'autolabel percent')
 }
 
+plot_mean_certainty_threshold <- function(){
+  data <- read.csv('experiments/experiments_results/mean_certainty_threshold.csv', header = TRUE, sep = ",")
+  
+  common_plot(data, 'mean_certainty_threshold', 'mean cert. threshold')
+}
+
+plot_similarity_threshold <- function(){
+  data <- read.csv('experiments/experiments_results/similiarity_threshold.csv', header = TRUE, sep = ",")
+  
+  common_plot(data, 'similarity_threshold', 'similarity threshold')
+}
+
 plot_certainties <- function(){
   data <- read.csv('experiments/experiments_results/svm_certainties.csv', header = TRUE, sep = ",")
   certainties <- data[['mean_certainty']]
@@ -77,4 +89,6 @@ plot_certainties <- function(){
 #plot_labelled_set_size_results()
 #plot_sample_size_results()
 #plot_autolabel_perc_results()
-plot_certainties()
+#plot_certainties()
+#plot_mean_certainty_threshold()
+plot_similarity_threshold()

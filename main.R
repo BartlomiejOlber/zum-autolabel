@@ -40,7 +40,6 @@ LABELLED_INITIAL_SIZE = data$train_labelled_initial_size
 # 6. choose N the most certain
 # 7. label them
 # 8. extend labelled, shrink unlabelled (only chosen or all considered)
-certainties = c()
 fmeasure_results = c()
 auroc_results = c()
 prev_decision_set_predictions <- NULL
@@ -52,7 +51,8 @@ while (loop_counter < max_iterations) {
   cat(sprintf("------------------------------------------------------------\n"))
   cat(sprintf("iteration no. %d \n", loop_counter))
   
-  if (use_xgb) {
+  # 1. train classifier on labelled set
+  if (use_xgb) { 
     dtrain <-
       xgb.DMatrix(data = as.matrix(labelled_set[, 1:(N_COLS - 1)]),
                   label = as.numeric(labelled_set[, N_COLS]))
@@ -77,6 +77,7 @@ while (loop_counter < max_iterations) {
     )
   }
   
+  # 2. eval on test data
   if (eval_on_test) {
     test_predictions  <- predict(classifier, as.matrix(test_set[1:(N_COLS - 1)]))
     auroc             <- auc_roc(preds = test_predictions, actuals = test_set[, N_COLS])
@@ -86,11 +87,9 @@ while (loop_counter < max_iterations) {
     fmeasure_results  <- c(fmeasure_results, fmeasure)
   }
   
-  
+  # 3. get desicion set predictions
   decision_set_predictions <- predict(classifier, as.matrix(decision_set[1:(N_COLS - 1)]))
-  # for checking how mean_certainty change over the training
-  mean_certainty = abs(1 - mean(abs(decision_set_predictions - round(decision_set_predictions))))
-  certainties = c(certainties, mean_certainty)
+  # 4. check criterion
   if (!is.null(prev_decision_set_predictions) || criterion_used == CRITERION_TYPES$certainty_threshold) {
     
     if (check_stop_criterion(criterion_used, prev_decision_set_predictions, decision_set_predictions))
@@ -103,10 +102,12 @@ while (loop_counter < max_iterations) {
   }
   prev_decision_set_predictions <- decision_set_predictions
   
+  # 5. predict on unlabelled
   sample_ids          <- sample(nrow(unlabelled_set), sample_size)
   sample_rows         <- unlabelled_set[sample_ids,]
   sample_predictions  <- predict(classifier, as.matrix(sample_rows[1:(N_COLS - 1)]))
   
+  # 6. choose most certain, label them with predictions, add them to labelled set
   most_certain        <- choose_most_certain(sample_rows, sample_predictions)
   unlabelled_set      <- unlabelled_set[!(row.names(unlabelled_set) %in% row.names(most_certain)),]
   labelled_set        <- rbind(labelled_set, most_certain)
@@ -117,9 +118,6 @@ while (loop_counter < max_iterations) {
   n_labelled              = nrow(labelled_set) - LABELLED_INITIAL_SIZE
   cat(sprintf("number of incorrectly labelled: %d out of %d labelled \n", n_incorrectly_labelled, n_labelled))
 }
-# do something with the results
-print(auroc_results)
-print(fmeasure_results)
 
 # save experiment result
 used_cl <- if (use_xgb) "xgb" else "svm"
@@ -140,4 +138,3 @@ experiment_summary <- c(
   criterion_args$similarity_threshold
 )
 save_results(experiment_summary)
-save_certainties(certainties)
