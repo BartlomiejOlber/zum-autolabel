@@ -28,7 +28,7 @@ cat(sprintf("decision set size: %d \n", nrow(decision_set)))
 
 N_COLS = data$n_cols
 LABELLED_INITIAL_SIZE = data$train_labelled_initial_size
-
+INITIAL_LABELLED = data$labelled_set
 # Autolabel algorithm
 # 1. train
 # 2. count eval metrics on test set and append them to list
@@ -138,3 +138,39 @@ experiment_summary <- c(
   criterion_args$similarity_threshold
 )
 save_results(experiment_summary)
+save_metrics_over_algorithm(auroc_results, fmeasure_results)
+
+
+
+########################################################################
+# train second classifier on labbled by the first
+if (use_xgb) { 
+  other_classifier <- svm(x = as.matrix(labelled_set[, 1:(N_COLS - 1)]), y = as.numeric(labelled_set[, N_COLS]), kernel = svm_kernel, cost = svm_cost, scale = svm_scale, probability = svm_probability )
+}else{
+  dtrain <-
+    xgb.DMatrix(data = as.matrix(labelled_set[, 1:(N_COLS - 1)]),
+                label = as.numeric(labelled_set[, N_COLS]))
+  other_classifier <- xgboost(data = dtrain, max.depth = xgb_max_depth, eta = xgb_eta, nthread = xgb_nthread, nrounds = xgb_nrounds, objective = xgb_objective, verbose = xgb_verbose)
+}
+other_final_test_predictions  <- predict(other_classifier, as.matrix(test_set[1:(N_COLS - 1)]))
+other_final_auroc             <- auc_roc(preds = other_final_test_predictions, actuals = test_set[, N_COLS])
+other_final_fmeasure          <- compute_fmeasure(other_final_test_predictions, test_set[, N_COLS])
+
+# train second classifier on initial lablled set
+if (use_xgb) { 
+  other_classifier <- svm(x = as.matrix(INITIAL_LABELLED[, 1:(N_COLS - 1)]), y = as.numeric(INITIAL_LABELLED[, N_COLS]), kernel = svm_kernel, cost = svm_cost, scale = svm_scale, probability = svm_probability )
+}else{
+  dtrain <-
+    xgb.DMatrix(data = as.matrix(INITIAL_LABELLED[, 1:(N_COLS - 1)]),
+                label = as.numeric(INITIAL_LABELLED[, N_COLS]))
+  other_classifier <- xgboost(data = dtrain, max.depth = xgb_max_depth, eta = xgb_eta, nthread = xgb_nthread, nrounds = xgb_nrounds, objective = xgb_objective, verbose = xgb_verbose)
+}
+other_initial_test_predictions              <- predict(other_classifier, as.matrix(test_set[1:(N_COLS - 1)]))
+other_initial_auroc             <- auc_roc(preds = other_initial_test_predictions, actuals = test_set[, N_COLS])
+other_initial_fmeasure          <- compute_fmeasure(other_initial_test_predictions, test_set[, N_COLS])
+
+
+save_metrics_of_other(
+  other_final_auroc, other_final_fmeasure,
+  other_initial_auroc, other_initial_fmeasure
+)

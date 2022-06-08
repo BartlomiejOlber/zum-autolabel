@@ -84,6 +84,57 @@ plot_certainties <- function(){
   plot(certainties, main = glue('SVM: mean certainty over algorithm'), type = 'l', col = 'blue', ylim = c(0.5, 1), xlab = 'iteration', ylab = 'mean certainty')
 }
 
+plot_metrics <- function(){
+  data <- read.csv('experiments/experiments_results/METRICS_OVER_ALGORITHM.csv', header = TRUE, sep = ",")
+  if (use_xgb){
+    desc = 'XGB'
+    auroc_compare <- xgb_auroc_compare
+    f1_compare <- xgb_f1_compare
+  }else{
+    desc = 'SVM'
+    auroc_compare <- svm_auroc_compare
+    f1_compare <- svm_f1_compare
+  }
+  aurocs <- data[['auroc']]
+  f1s <- data[['f1']]
+  
+  plot(aurocs, main = desc, type = 'l', col = 'blue', ylim = c(0.5, 1), xlab = 'iteration', ylab = 'AUROC')
+  abline(h = auroc_compare, col='red', lty=2)
+  
+  plot(f1s, main = desc, type = 'l', col = 'blue', ylim = c(0.5, 1), xlab = 'iteration', ylab = 'F1')
+  abline(h = f1_compare, col='red', lty=2)
+}
+
+plot_eval_on_other <- function(){
+  data <- read.csv('experiments/experiments_results/EVAL_ON_OTHER_METRICS.csv', header = TRUE, sep = ",")
+  ylim = c(0, 1)
+  
+  svm_to_xgb_result <- data[data$variant=='SVM to XGB', ]
+  svm_to_xgb_final_f1_compare      <- svm_to_xgb_result[['final_f1']][1]
+  svm_to_xgb_final_auroc_compare   <- svm_to_xgb_result[['final_auroc']][1]
+  svm_to_xgb_initial_f1_compare    <- svm_to_xgb_result[['initial_f1']][1]
+  svm_to_xgb_initial_auroc_compare <- svm_to_xgb_result[['initial_auroc']][1]
+  
+  xgb_to_svm_result <- data[data$variant=='XGB to SVM', ]
+  xgb_to_svm_final_f1_compare      <- xgb_to_svm_result[['final_f1']][1]
+  xgb_to_svm_final_auroc_compare   <- xgb_to_svm_result[['initial_auroc']][1]
+  xgb_to_svm_initial_f1_compare    <- xgb_to_svm_result[['final_f1']][1]
+  xgb_to_svm_initial_auroc_compare <- xgb_to_svm_result[['initial_auroc']][1]
+  
+  # plot xgb f1
+  barplot(c(svm_to_xgb_final_f1_compare, svm_to_xgb_initial_f1_compare, xgb_f1_compare), names.arg =c('S->X', 'XGB labl', 'XGB all'), ylim = ylim, main = 'XGB-F1')
+  
+  # plot svm f1
+  barplot(c(xgb_to_svm_final_f1_compare, svm_to_xgb_initial_auroc_compare, svm_f1_compare), names.arg =c('X->S', 'SVM labl', 'SVM all'), ylim = ylim, main = 'SVM-F1')
+  
+  # plot xgb auroc
+  barplot(c(svm_to_xgb_final_auroc_compare, svm_to_xgb_initial_auroc_compare, xgb_auroc_compare), names.arg =c('S->X', 'XGB labl', 'XGB all'), ylim = ylim, main = 'XGB-AUROC')
+  
+  # plot svm auroc
+  barplot(c(xgb_to_svm_final_auroc_compare, xgb_to_svm_initial_auroc_compare, svm_auroc_compare), names.arg =c('X->S', 'SVM labl', 'SVM all'), ylim = ylim, main = 'SVM-AUROC') 
+  
+}
+
 
 
 #plot_labelled_set_size_results()
@@ -91,4 +142,6 @@ plot_certainties <- function(){
 #plot_autolabel_perc_results()
 #plot_certainties()
 #plot_mean_certainty_threshold()
-plot_similarity_threshold()
+#plot_similarity_threshold()
+#plot_metrics()
+plot_eval_on_other()

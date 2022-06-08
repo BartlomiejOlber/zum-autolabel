@@ -1,24 +1,24 @@
 use_xgb <- FALSE
 eval_on_test <- TRUE
-dataset <- "spambase" # "magic, "ring"
+dataset <- "ring" #"magic", "spambase, "ring"
 
 
 CRITERION_TYPES <- list(
   "stabilization"="stabilization", 
   "certainty_growth"="certainty_growth", 
   "certainty_threshold"="certainty_threshold")
-criterion_used = CRITERION_TYPES$stabilization
+criterion_used = CRITERION_TYPES$certainty_threshold
 criterion_args <- list(
-  "similarity_threshold" = 0.98, # stabilization
+  "similarity_threshold" = 0.99, # stabilization
   "highest_certainty_sofar" = 0.0, # certainty_growth
   "mean_certainty_threshold" = 0.95 # certainty_threshold
   ) 
 seed = 1
 max_iterations <- 100
 split_ratios = c(0.75, 0.25) # (train, test)
-split_train_ratios = c(0.01, 0.98, 0.01) # (labelled, unlabelled, decision)
-sample_size = 400
-autolabel_percent = 0.05
+split_train_ratios = c(0.03, 0.96, 0.01) # (labelled, unlabelled, decision)
+sample_size = 600
+autolabel_percent = 0.03
 patience <- 5
 
 ###### XGBOOST

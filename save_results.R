@@ -29,3 +29,35 @@ save_certainties <- function(certainties){
   
   write.csv(df, file_name, row.names = FALSE)
 }
+
+save_metrics_over_algorithm <- function(aurocs, f1s){
+  file_name <- 'experiments/experiments_results/METRICS_OVER_ALGORITHM.csv'
+  column_names <- c('auroc', 'f1')
+  df <- data.frame(aurocs, f1s)
+  colnames(df) <- column_names
+
+  write.csv(df, file_name, row.names = FALSE)
+}
+
+save_metrics_of_other <- function(final_auroc, final_f1, initial_auroc, initial_f1){
+  file_name <- 'experiments/experiments_results/EVAL_ON_OTHER_METRICS.csv'
+  
+  column_names <- c('final_auroc', 'final_f1', 'initial_auroc', 'initial_f1', 'variant', 'dataset')
+  if (file.exists(file_name)){
+    df <- read.csv(file_name, header = FALSE, sep = ",", skip = 1)
+  }else{
+    df <- data.frame(matrix(ncol = length(column_names), nrow = 0))
+  }
+  if(use_xgb){
+    variant <- 'XGB to SVM'
+  }else{
+    variant <- 'SVM to XGB'
+  }
+  colnames(df) <- column_names
+  
+  new_row <- data.frame(t(c(final_auroc, final_f1, initial_auroc, initial_f1, variant, dataset)))
+  colnames(new_row) <- column_names
+  df <- rbind(df, new_row)
+  
+  write.csv(df, file_name, row.names = FALSE)
+}

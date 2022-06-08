@@ -1,0 +1,5 @@
+"classifier","dataset","final AUROC","final F1","percentage of train size labelled","initially labelled","labelled","incorrectly laballed","iterations","sample_size","autolabel_percent","criterion_used","mean_certainty_threshold","similarity_threshold"
+"svm","spambase","0.914572433981066","0.765133171912833","0.03","103","1768","88","100","600","0.03","certainty_threshold","0.95","0.99"
+"xgb","spambase","0.922004235176881","0.826132771338251","0.03","103","165","7","100","600","0.03","certainty_threshold","0.95","0.99"
+"xgb","ring","0.90947614819598","0.836824159766196","0.03","166","1800","84","100","600","0.03","certainty_threshold","0.95","0.99"
+"svm","ring","0.993519262646504","0.959796437659033","0.03","166","1800","2","100","600","0.03","certainty_threshold","0.95","0.99"
